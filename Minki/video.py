@@ -120,5 +120,12 @@ while True:
 cap.release()
 e_time = time.time()
 now = datetime.datetime.now()
+
 print(f'Video종료: {now.year} {now.month}월 {now.day}일 {now.hour}시 {now.minute}분 {now.second}초')
-print('Video 작동시간:', e_time - s_time)
+finish_time = round(e_time - s_time)
+finish_miniute = finish_time // 60
+finish_second = finish_time % 60
+if finish_time > 60:
+    print('Video 작동시간:', finish_miniute ,'분', finish_second ,'초')
+else:
+    print('Video 작동시간:', finish_time ,'초')
