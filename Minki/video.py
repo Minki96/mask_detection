@@ -20,7 +20,10 @@ print(f'Video시작: {now.year}년 {now.month}월 {now.day}일 {now.hour}시 {no
 
 ret, img = cap.read()
 s_time = time.time()
+
 Id_list = []
+
+mask_count = 0
 
 while True:
     ret, img = cap.read()
@@ -46,16 +49,20 @@ while True:
             rects.append(box.astype("int"))
             
             area = (box[2] - box[0]) * (box[3] - box[1])
-            area_under = 50000 ; area_upper = 80000
+            area_under = int(cap.get(3) * cap.get(4) * 0.04);
+            area_upper = int(cap.get(3) * cap.get(4) * 0.08)
             mask_rate = 0.7
-            print(area)
-            
+            #print(area)
+            #print(area_under)
+            #print(area_upper)
+
             if area_under < area < area_upper :
                 try:
                     face_input = cv2.resize(face, dsize=(224, 224))
                     face_input = cv2.cvtColor(face_input, cv2.COLOR_BGR2RGB)
                     face_input = preprocess_input(face_input) 
                     face_input = np.expand_dims(face_input, axis=0)
+
                     mask, no_mask = model.predict(face_input).squeeze()
 
                 except:
@@ -67,15 +74,19 @@ while True:
                     face_input = cv2.cvtColor(face_input, cv2.COLOR_BGR2RGB)
                     face_input = preprocess_input(face_input) 
                     face_input = np.expand_dims(face_input, axis=0)
+
                     mask, no_mask = model.predict(face_input).squeeze()
 
                     if mask > mask_rate :
                         color = (0, 255, 0)
                         label = 'Mask %d%%' % (mask * 100)
-    
+
                     else :
                         color = (0, 0, 255)
                         label = 'No Mask %d%%' % (no_mask * 100)
+                        mask_count += 1
+                        print(mask_count)
+
 
                 except:
                     continue
@@ -90,12 +101,13 @@ while True:
                     
                     for (objectID, centroid) in objects.items():
                         text = "ID{}".format(objectID)
-                        if text not in Id_list:
+
+                        if text not in Id_list and mask_count>25:
                             Id_list.append(text)
                             if color == (0, 0, 255):
                                 print('request..', text)
+                                mask_count = 0
                                 # cap_img = cv2.imwrite('./no_mask_person/no_mask_person' + text +'.jpg', result_img)
-
 
                         cv2.putText(result_img, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),2)
                         cv2.circle(result_img, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
@@ -118,6 +130,7 @@ while True:
 
 
 cap.release()
+
 e_time = time.time()
 now = datetime.datetime.now()
 
