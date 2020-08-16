@@ -7,6 +7,9 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import cv2
 from pyimagesearch.centroidtracker import CentroidTracker
+from tkinter import *
+
+win = Tk()
 
 # from cloud_messaging import mainss
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -121,7 +124,8 @@ while True:
 
     
     cv2.imshow('result', result_img)
-    if cv2.waitKey(1) == ord('q'): 
+    if cv2.waitKey(1) == ord('q'):
+        ctypes.windll.user32.MessageBoxW(0, "Your text", "Your title", 1)
         cv2.destroyAllWindows()
         break
 
