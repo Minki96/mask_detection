@@ -10,5 +10,5 @@
 * 앱과 연동하여 실시간 알람   
 <img src="/Minki/cap.jpeg" width="250px" height="300px" title="px(픽셀) 크기 설정" alt="cap"></img><br/>    
 
-참고 : https://www.pyimagesearch.com/2018/07/23/simple-object-tracking-with-opencv/
+참고 : https://www.pyimagesearch.com/2018/07/23/simple-object-tracking-with-opencv/   
 https://www.pyimagesearch.com/2020/05/04/covid-19-face-mask-detector-with-opencv-keras-tensorflow-and-deep-learning/
