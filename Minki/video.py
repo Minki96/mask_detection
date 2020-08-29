@@ -8,12 +8,9 @@ import numpy as np
 import cv2
 from class_folder.centroidtracker import CentroidTracker
 
-
-# from cloud_messaging import mainss
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 now = datetime.datetime.now()
 facenet = cv2.dnn.readNet('models/deploy.prototxt', 'models/res10_300x300_ssd_iter_140000.caffemodel')
-model = load_model('models/fourB_detect_mask.model')
+model = load_model('models/minki_made.model ')
 ct = CentroidTracker()
 cap = cv2.VideoCapture(0)
 
@@ -55,7 +52,7 @@ while True:
             mask_rate = 0.7
             #print(area)
             #print(area_under)
-            #print(area_upper)
+            #print(area_upper)q
 
             if area_under < area < area_upper :
                 try:
@@ -79,14 +76,19 @@ while True:
                     mask, no_mask = model.predict(face_input).squeeze()
 
                     if mask > mask_rate :
-                        color = (0, 255, 0)
-                        label = 'Mask %d%%' % (mask * 100)
+                        color = (0, 0, 255)
+                        label = 'No Mask %d%%' % (mask * 100)
+
+
+                        cv2.imwrite('nomask.jpg', face)
+                        no_mask_pic = 'nomask.jpg'
+
 
                     else :
-                        color = (0, 0, 255)
-                        label = 'No Mask %d%%' % (no_mask * 100)
-                        mask_count += 1
-                        print(mask_count)
+                        color = (0, 255, 0)
+                        label = 'Mask %d%%' % (no_mask * 100)
+
+
 
 
                 except:
@@ -103,12 +105,11 @@ while True:
                     for (objectID, centroid) in objects.items():
                         text = "ID{}".format(objectID)
 
-                        if text not in Id_list and mask_count>25:
+                        if text not in Id_list:
                             Id_list.append(text)
                             if color == (0, 0, 255):
                                 print('request..', text)
-                                mask_count = 0
-                                # cap_img = cv2.imwrite('./no_mask_person/no_mask_person' + text +'.jpg', result_img)
+                                request.post('http://3.34.183.253:5000/nomask')
 
                         cv2.putText(result_img, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),2)
                         cv2.circle(result_img, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
