@@ -1,2 +1,2 @@
 # Mask Detection
-minki and taehwan
+#### 1.model
