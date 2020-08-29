@@ -6,10 +6,8 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.models import load_model
 import numpy as np
 import cv2
-from pyimagesearch.centroidtracker import CentroidTracker
-from tkinter import *
+from class_folder.centroidtracker import CentroidTracker
 
-win = Tk()
 
 # from cloud_messaging import mainss
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
