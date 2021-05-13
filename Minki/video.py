@@ -6,13 +6,11 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.models import load_model
 import numpy as np
 import cv2
-from pyimagesearch.centroidtracker import CentroidTracker
+from class_folder.centroidtracker import CentroidTracker
 
-# from cloud_messaging import mainss
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 now = datetime.datetime.now()
 facenet = cv2.dnn.readNet('models/deploy.prototxt', 'models/res10_300x300_ssd_iter_140000.caffemodel')
-model = load_model('models/fourB_detect_mask.model')
+model = load_model('models/minki_made.model ')
 ct = CentroidTracker()
 cap = cv2.VideoCapture(0)
 
@@ -20,7 +18,10 @@ print(f'Video시작: {now.year}년 {now.month}월 {now.day}일 {now.hour}시 {no
 
 ret, img = cap.read()
 s_time = time.time()
+
 Id_list = []
+
+mask_count = 0
 
 while True:
     ret, img = cap.read()
@@ -46,16 +47,20 @@ while True:
             rects.append(box.astype("int"))
             
             area = (box[2] - box[0]) * (box[3] - box[1])
-            area_under = 50000 ; area_upper = 80000
+            area_under = int(cap.get(3) * cap.get(4) * 0.04);
+            area_upper = int(cap.get(3) * cap.get(4) * 0.08)
             mask_rate = 0.7
-            print(area)
-            
+            #print(area)
+            #print(area_under)
+            #print(area_upper)q
+
             if area_under < area < area_upper :
                 try:
                     face_input = cv2.resize(face, dsize=(224, 224))
                     face_input = cv2.cvtColor(face_input, cv2.COLOR_BGR2RGB)
                     face_input = preprocess_input(face_input) 
                     face_input = np.expand_dims(face_input, axis=0)
+
                     mask, no_mask = model.predict(face_input).squeeze()
 
                 except:
@@ -67,15 +72,24 @@ while True:
                     face_input = cv2.cvtColor(face_input, cv2.COLOR_BGR2RGB)
                     face_input = preprocess_input(face_input) 
                     face_input = np.expand_dims(face_input, axis=0)
+
                     mask, no_mask = model.predict(face_input).squeeze()
 
                     if mask > mask_rate :
-                        color = (0, 255, 0)
-                        label = 'Mask %d%%' % (mask * 100)
-    
-                    else :
                         color = (0, 0, 255)
-                        label = 'No Mask %d%%' % (no_mask * 100)
+                        label = 'No Mask %d%%' % (mask * 100)
+
+
+                        cv2.imwrite('nomask.jpg', face)
+                        no_mask_pic = 'nomask.jpg'
+
+
+                    else :
+                        color = (0, 255, 0)
+                        label = 'Mask %d%%' % (no_mask * 100)
+
+
+
 
                 except:
                     continue
@@ -90,12 +104,12 @@ while True:
                     
                     for (objectID, centroid) in objects.items():
                         text = "ID{}".format(objectID)
+
                         if text not in Id_list:
                             Id_list.append(text)
                             if color == (0, 0, 255):
                                 print('request..', text)
-                                # cap_img = cv2.imwrite('./no_mask_person/no_mask_person' + text +'.jpg', result_img)
-
+                                request.post('http://3.34.183.253:5000/nomask')
 
                         cv2.putText(result_img, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),2)
                         cv2.circle(result_img, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
@@ -109,7 +123,8 @@ while True:
 
     
     cv2.imshow('result', result_img)
-    if cv2.waitKey(1) == ord('q'): 
+    if cv2.waitKey(1) == ord('q'):
+        ctypes.windll.user32.MessageBoxW(0, "Your text", "Your title", 1)
         cv2.destroyAllWindows()
         break
 
@@ -118,7 +133,15 @@ while True:
 
 
 cap.release()
+
 e_time = time.time()
 now = datetime.datetime.now()
+
 print(f'Video종료: {now.year} {now.month}월 {now.day}일 {now.hour}시 {now.minute}분 {now.second}초')
-print('Video 작동시간:', e_time - s_time)
+finish_time = round(e_time - s_time)
+finish_miniute = finish_time // 60
+finish_second = finish_time % 60
+if finish_time > 60:
+    print('Video 작동시간:', finish_miniute ,'분', finish_second ,'초')
+else:
+    print('Video 작동시간:', finish_time ,'초')
